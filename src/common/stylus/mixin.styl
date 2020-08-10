@@ -1,0 +1,6 @@
+@import "~cube-ui/src/common/stylus/mixin.styl"
+
+bg-image($url, $ext = ".png")
+  background-image: url($url + $ext)
+  @media (min-resolution: 3dppx)
+    background-image: url($url + $ext)
