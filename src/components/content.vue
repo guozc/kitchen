@@ -5,15 +5,23 @@
 </template>
 
 <script>
+import { getDishes } from 'api'
+
 export default {
     name: 'user-content',
     components: {},
     data() {
         return {
+            menu: []
          }
     },
     props: {},
-    created() {},
+    created() {
+        getDishes().then((res) => {
+            this.menu = res
+            console.log(this.dishes)
+        })
+    },
     computed: {},
     methods: {}
 }

@@ -1,5 +1,5 @@
 <template>
-  <div class="lg-header">
+  <div class="lg-header border-bottom-1px">
       <div class="logo"></div>
   </div>
 </template>
@@ -24,11 +24,11 @@ export default {
 
 .lg-header
     width: 100%
-    height:125px
+    height:100px
     background-color: $color-grey-lg
     .logo
         width: 300px
-        height: 125px
+        height: 100px
         margin: 0 auto
         background-size: 300px 125px
         bg-image('logo')
