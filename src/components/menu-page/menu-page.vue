@@ -67,11 +67,12 @@
 </template>
 
 <script>
-import { getDishes } from 'api'
+import { getDishes, getOrderByInvite } from 'api'
 import lgIcon from 'components/lg-icon/lg-icon'
 import pickBtn from 'components/pick-btn/pick-btn'
 import billBar from 'components/bill-bar/bill-bar'
 import Bubble from 'components/bubble/bubble'
+import queryString from 'query-string'
 
 export default {
     name: 'menu-page',
@@ -101,6 +102,23 @@ export default {
         }
     },
     created() {
+        const parsed = queryString.parse(location.search)
+        if (parsed.invite && parsed.invite.length === 3) {
+            const gobiData = {}
+            gobiData.invite = parsed.invite
+            gobiData.openid = this.user.openid
+            getOrderByInvite(gobiData).then((res) => {
+                if (res.id) {
+                    this.$createDialog({
+                        type: 'alert',
+                        title: '用餐信息确认',
+                        content: `${res.date}  ${res.interval === 0 ? '午餐' : '晚餐'}`,
+                        icon: 'cubeic-right'
+                    }).show()
+                    this.order = res
+                }
+            })
+        }
     },
     computed: {
         barTxts() {
@@ -133,6 +151,14 @@ export default {
         }
     },
     methods: {
+        showAlert(text) {
+            this.$createDialog({
+                type: 'alert',
+                title: '用餐码无效',
+                content: text,
+                icon: 'cubeic-alert'
+            }).show()
+        },
         billReady() {
             this.order = {}
             this.menu.forEach((subMenu) => {

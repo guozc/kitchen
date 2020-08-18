@@ -15,9 +15,9 @@ const fakerUser = [
         avatar: 'http://thirdwx.qlogo.cn/mmopen/vi_32/Q0j4TwGTfTIBnVSbcokEOwX7jo1wCcGlAw6281iaQHvm3BPxgQbu5Izmr8fPviadUIZm9HGRadFI0J8XfkBiaIZEQ/132'
     },
     {
-        openid: 'oVpHFuDbjuRO5S-eELZQ8WAiIlho',
+        openid: 'oVpHFuF0lL4oaAvTugOspvJWdNS0',
         name: 'JUU1JThEJUI3JUU2JUFGJTlCJUU4JTgyJTg5JUU2JTlEJUJF',
-        avatar: 'http://thirdwx.qlogo.cn/mmopen/vi_32/P3ZXIDAiboXCtuicupO41yJs3zBib8cqAUjrNB2Fea0CGTKYbbDqzCCPUjQ8ChFBZMO6aocey8FRkCgqg6Pab6a0Q/132'
+        avatar: 'http://h5.whalesgeek.net/wechat_image/mmopen/vi_32/Q0j4TwGTfTI5snx6fqLSTLTBLAwt8o46hswOuv7HxLicOkxLdg64lqXM01OdX6oafjE0GmrcHfTSNRhdBpekSKA/132'
     },
     {
         openid: 'oVpHFuK8bJpVvaI8WuniciZNC_vQ',
@@ -36,9 +36,41 @@ const fakerUser = [
     }
 ]
 
+const getCookie = (cName) => {
+    if (document.cookie.length > 0) {
+      let cStart = document.cookie.indexOf(cName + '=')
+      if (cStart !== -1) {
+        cStart = cStart + cName.length + 1
+        let cEnd = document.cookie.indexOf(';', cStart)
+        if (cEnd === -1) cEnd = document.cookie.length
+        return unescape(document.cookie.substring(cStart, cEnd))
+        }
+      }
+    return ''
+}
+
+const isDebug = false
 export function getUserApi() {
     return function() {
-        return fakerUser[2]
+        if (isDebug) {
+            return fakerUser[2]
+        } else {
+            const openid = getCookie('whale_openid_new')
+            const cookieData = {}
+            if (!openid) {
+                window.location.href = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx5bda125790f46602&redirect_uri=https://api.whalesgeek.net/get_wx_user_info_new&response_type=code&scope=snsapi_userinfo&state=' + window.location.href + '#wechat_redirect'
+            } else {
+                cookieData.country = getCookie('whale_country_new')
+                cookieData.headimgurl = getCookie('whale_headimgurl_new')
+                cookieData.language = getCookie('whale_language_new')
+                cookieData.name = getCookie('whale_nickname_new')
+                cookieData.openid = getCookie('whale_openid_new')
+                cookieData.province = getCookie('whale_province_new')
+                cookieData.sex = getCookie('whale_sex_new')
+                cookieData.avatar = window.location.href.split('/').slice(0, 3).join('/') + '/' + 'wechat_image' + '/' + getCookie('whale_headimgurl_new').split('/').slice(3).join('/')
+                return cookieData
+            }
+        }
     }
 }
 
@@ -108,5 +140,92 @@ export function getBillsByOpenidApi() {
 
             return data
         }
+    }
+}
+
+export function getAllOrdersApi() {
+    return async function(param = {}) {
+        const res = await axios.post('//api.whalesgeek.net/kitchen/get_orders', param)
+        const { code, data } = res.data
+        if (code === RES_OK) {
+            return data
+        }
+    }
+}
+
+export function changeOrderStatusApi() {
+    return async function(param = {}) {
+        const res = await axios.post('//api.whalesgeek.net/kitchen/change_order_status', param)
+        const { code, data } = res.data
+        if (code === RES_OK) {
+            return data
+        }
+    }
+}
+
+export function addOrderApi() {
+    return async function(param = {}) {
+        const res = await axios.post('//api.whalesgeek.net/kitchen/add_order', param)
+        const { code, data } = res.data
+        if (code === RES_OK) {
+            return data
+        }
+    }
+}
+
+export function confirmOrderApi() {
+    return async function(param = {}) {
+        const res = await axios.post('//api.whalesgeek.net/kitchen/confirm_order', param)
+        const { code, data } = res.data
+        if (code === RES_OK) {
+            return data
+        }
+    }
+}
+
+export function getOrderByIdApi() {
+    return async function(param = {}) {
+        const res = await axios.post('//api.whalesgeek.net/kitchen/get_order_by_id', param)
+        const { code, data } = res.data
+        if (code === RES_OK) {
+            if (data.dishes) {
+                data.dishes.forEach((dish) => {
+                    dish.imageUrl = imagePrefix + dish.pic
+                })
+            } else {
+                data.dishes = []
+            }
+            data.bills.forEach((bill) => {
+                bill.imageUrl = imagePrefix + bill.pic
+            })
+            return data
+        }
+    }
+}
+
+const postRequest = (url, params) => {
+    return axios({
+        method: 'post',
+        url: url,
+        data: params,
+        transformRequest: [function (data) {
+        let ret = ''
+        for (const it in data) {
+            ret += encodeURIComponent(it) + '=' + encodeURIComponent(data[it]) + '&'
+        }
+        return ret
+        }],
+        headers: {
+        'Content-Type': 'application/x-www-form-urlencoded'
+        }
+    })
+}
+
+export function getWxConfigApi() {
+    return async function(param = {}) {
+        const res = await postRequest('//api.whalesgeek.net/get_wx_sign', {
+            url: location.href.split('#')[0]
+        })
+        return res.data
     }
 }

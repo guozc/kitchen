@@ -75,10 +75,7 @@ export default {
         })
       },
       fetch() {
-             if (!this.fetched) {
-                this.fetched = true
-                this.refreshOrder()
-             }
+            this.refreshOrder()
         },
       getOrderUser(orderId) {
         let od = this.orders.filter((order) => {
@@ -159,7 +156,6 @@ export default {
             padding: 5px 20px
             border-radius: 4px
             border: 1px solid $color-light-pink
-            font-weight: 700
           .interval
             font-size: $fontsize-medium
             color: $color-light-pink
